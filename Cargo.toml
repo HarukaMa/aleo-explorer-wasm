@@ -1,0 +1,20 @@
+[package]
+name = "aleo-explorer-wasm"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+snarkvm-console-network = {version = "0.11.2", features = ["wasm"]}
+snarkvm-console-program = "0.11.2"
+snarkvm-console-account = "0.11.2"
+snarkvm-console-types = "0.11.2"
+
+[profile.release]
+lto = true
+opt-level = "s"
+debug = false
