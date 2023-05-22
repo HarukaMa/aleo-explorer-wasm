@@ -1,8 +1,2 @@
 [build]
-target = "wasm32-wasi"
-rustflags = [
-    "-C", "link-args=--export",
-    "-C", "link-args=malloc",
-    "-C", "link-args=--export",
-    "-C", "link-args=free",
-]
+target = "wasm32-unknown-unknown"
