@@ -4,6 +4,7 @@ use snarkvm_console_account::{Signature, ViewKey};
 use snarkvm_console_network::{traits::ToBits, Network, Testnet3};
 use snarkvm_console_program::{
     Ciphertext,
+    FromBytes,
     Identifier,
     Literal,
     LiteralType,
@@ -120,20 +121,30 @@ pub fn hash_value(hash_type: &str, value: &str, destination_type: &str) -> Resul
 
 #[no_mangle]
 #[wasm_bindgen]
-pub fn verify_signature(signature: &str, address: &str, message: &str) -> Result<bool, JsValue> {
+pub fn verify_signature(signature: &str, address: &str, message: &str, message_type: &str) -> Result<bool, JsValue> {
     let signature = Signature::<N>::from_str(signature)
         .map_err(|e| JsValue::from_str(format!("invalid signature: {e}").as_str()))?;
     let address =
         Address::<N>::from_str(address).map_err(|e| JsValue::from_str(format!("invalid address: {e}").as_str()))?;
-    let message = Value::Plaintext(
-        Plaintext::from_str(message).map_err(|e| JsValue::from_str(format!("invalid message: {e}").as_str()))?,
-    );
-    Ok(signature.verify(
-        &address,
-        &message
+    match message_type {
+        "value" => {
+            let message = Value::<N>::Plaintext(
+                Plaintext::from_str(message)
+                    .map_err(|e| JsValue::from_str(format!("invalid message: {e}").as_str()))?,
+            )
             .to_fields()
-            .map_err(|e| JsValue::from_str(format!("invalid message: {e}").as_str()))?,
-    ))
+            .map_err(|e| JsValue::from_str(format!("invalid message: {e}").as_str()))?;
+            Ok(signature.verify(&address, &message))
+        }
+        "hex" => {
+            let message =
+                hex::decode(message).map_err(|e| JsValue::from_str(format!("invalid message: {e}").as_str()))?;
+            Ok(signature.verify_bytes(&address, &message))
+        }
+        _ => Err(JsValue::from_str(
+            format!("invalid message type: {message_type}").as_str(),
+        )),
+    }
 }
 
 #[no_mangle]
