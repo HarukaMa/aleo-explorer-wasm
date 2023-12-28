@@ -9,15 +9,16 @@ edition = "2021"
 crate-type = ["cdylib"]
 
 [dependencies]
-snarkvm-console-network = { version = "0.16.8", features = ["wasm"] }
-snarkvm-console-program = "0.16.8"
-snarkvm-console-account = "0.16.8"
-snarkvm-console-types = "0.16.8"
+snarkvm-console-network = { version = "0.16.15", features = ["wasm"] }
+snarkvm-console-program = "0.16.15"
+snarkvm-console-account = "0.16.15"
+snarkvm-console-types = "0.16.15"
+snarkvm-synthesizer-program = "0.16.15"
 
-wasm-bindgen = "0.2.86"
+wasm-bindgen = "0.2.89"
 
-getrandom = { version = "0.2.10", features = ["js"] }
-web-sys = { version = "0.3.65" , features = ["console"]}
+getrandom = { version = "0.2.11", features = ["js"] }
+web-sys = { version = "0.3.66" , features = ["console"]}
 hex = "0.4.3"
 
 [profile.release]

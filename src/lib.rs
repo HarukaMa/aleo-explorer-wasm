@@ -1,20 +1,10 @@
 use std::str::FromStr;
 
-use snarkvm_console_account::{Signature, ViewKey};
+use snarkvm_console_account::Signature;
 use snarkvm_console_network::{traits::ToBits, Network, Testnet3};
-use snarkvm_console_program::{
-    Ciphertext,
-    FromBytes,
-    Identifier,
-    Literal,
-    LiteralType,
-    Plaintext,
-    Record,
-    ToBytes,
-    ToFields,
-    Value,
-};
-use snarkvm_console_types::{Address, Field, Group, U16};
+use snarkvm_console_program::{Literal, LiteralType, Plaintext, ToBytes, ToFields, Value};
+use snarkvm_console_types::Address;
+use snarkvm_synthesizer_program::Program;
 use wasm_bindgen::prelude::*;
 
 type N = Testnet3;
@@ -157,6 +147,24 @@ pub fn value_to_bytes(message: &str) -> Result<Box<[u8]>, JsValue> {
         .to_bytes_le()
         .map_err(|e| JsValue::from_str(format!("invalid message: {e}").as_str()))?
         .into())
+}
+
+#[no_mangle]
+#[wasm_bindgen]
+pub fn estimate_deployment_fee(program: &str) -> Result<u64, JsValue> {
+    let program = Program::<N>::from_str(program)
+        .map_err(|e| JsValue::from_str(format!("failed to parse program: {e}").as_str()))?;
+    let program_size = program
+        .to_bytes_le()
+        .map_err(|e| JsValue::from_str(format!("failed to serialize program: {e}").as_str()))?
+        .len() as u64;
+    let functions = program.functions();
+    let identifier_size: u64 = functions
+        .iter()
+        .map(|(identifier, _)| identifier.to_string().len() as u64)
+        .sum();
+    let namespace_cost = 10u64.pow(10u32.saturating_sub(program.id().name().to_string().len() as u32)) * 1000000;
+    return Ok(1000 * (program_size + identifier_size + functions.len() as u64 * 724 + 5) + namespace_cost);
 }
 
 // #[no_mangle]
